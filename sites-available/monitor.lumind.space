@@ -1,6 +1,15 @@
 server {
     server_name monitor.lumind.space;
 
+    # burst=20: Allows a user to "burst" up to 20 requests at once before being rejected
+    # nodelay: Processes the burst immediately instead of slowing it down
+    limit_req zone=one burst=20 nodelay;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
     location / {
         proxy_pass http://127.0.0.1:3001;
 
@@ -18,6 +27,7 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/admin.lumind.space/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
 
 }
 server {
