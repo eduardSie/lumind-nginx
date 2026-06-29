@@ -14,12 +14,17 @@
 # ── Main HTTPS server ──────────────────────────────────────────────────────────
 server {
     listen 443 ssl;
-    server_name lumind.space;
+    server_name lumind.space www.lumind.space;
 
     ssl_certificate     /etc/letsencrypt/live/lumind.space/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/lumind.space/privkey.pem;
     include             /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+
+    # Redirect www → non-www canonical
+    if ($host = www.lumind.space) {
+        return 301 https://lumind.space$request_uri;
+    }
 
     limit_req zone=one burst=20 nodelay;
 
@@ -54,8 +59,9 @@ server {
 # ── Redirect plain HTTP → HTTPS ───────────────────────────────────────────────
 server {
     listen 80;
-    server_name lumind.space;
+    server_name lumind.space www.lumind.space;
 
+    if ($host = www.lumind.space) { return 301 https://lumind.space$request_uri; }
     if ($host = lumind.space) { return 301 https://$host$request_uri; }
 
     return 404;
